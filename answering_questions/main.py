@@ -1,9 +1,10 @@
 from transformers import pipeline
 import wikipedia
-import json
+import spacy
 
 tokenizer = "henryk/bert-base-multilingual-cased-finetuned-polish-squad2"
 model_name = "henryk/bert-base-multilingual-cased-finetuned-polish-squad2"
+nlp = spacy.load("pl_core_news_sm")
 
 def get_wiki_text(name):
     wikipedia.set_lang("pl")
@@ -17,48 +18,23 @@ def get_wiki_text(name):
     return article.content
 
 def get_subject(q):
-    output = ""
-    q = q.split()
-    if q[0] == "kim":
-        output = q[2:]
-        # we always del 2 first words if q starts with "kim"
-    elif q[0] == "gdzie":
-        if "się" in q:
-            output = q[3:]
-        else:
-            output = q[2:]
-    elif q[0] == "ile" or q == "ilu":
-        if "na" in q or "w" in q or "podczas" in q:
-            output = q[4:]
-        else:
-            output = q[2:]
-    elif q[0] == "co":
-        if "że" in q or "iż" in q:
-            output = q[3:]
-        else:
-            output = q[2:]
-    elif q[0] == "kiedy":
-        if "był" in q or "został" in q or "się" in q:
-            output = q[3:]
-        else:
-            output = q[2:]
-    elif q[0] == "jak":
-        output = q[2:]
-    elif q[0] == "kto":
-        output = q[2:]
+    doc = nlp(q)
 
-    return output
+    return " ".join([token.text for token in doc if token.pos_ == "PROPN"])
 
-question = input("Question: ").lower()
+def main_loop():
+    question = input("Question: ")
 
-search = get_subject(question)
-print(search)
-context = get_wiki_text(search)
+    search = get_subject(question)
+    print(search)
+    context = get_wiki_text(search)
 
-model = pipeline("question-answering",model=model_name,tokenizer=tokenizer)
+    model = pipeline("question-answering",model=model_name,tokenizer=tokenizer)
 
-output = model({'context': context,'question': question})
-print(output)
+    output = model({'context': context,'question': question})
+    print(output)
+
+main_loop()
 
 
 
