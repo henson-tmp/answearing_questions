@@ -1,10 +1,13 @@
+import yaml
 from transformers import pipeline
 import wikipedia
 import spacy
 
-tokenizer = "henryk/bert-base-multilingual-cased-finetuned-polish-squad2"
-model_name = "henryk/bert-base-multilingual-cased-finetuned-polish-squad2"
-nlp = spacy.load("pl_core_news_sm")
+with open("../config.yaml", "r") as f:
+    config = yaml.load(f, Loader=yaml.FullLoader)
+tokenizer = config["tokenizer"]
+model_name = config["model_name"]
+nlp = spacy.load(config["lang_model"])
 
 def get_wiki_text(name):
     wikipedia.set_lang("pl")
@@ -20,21 +23,25 @@ def get_wiki_text(name):
 def get_subject(q):
     doc = nlp(q)
 
-    return " ".join([token.text for token in doc if token.pos_ == "PROPN"])
+    return " ".join([token.text for token in doc if token.pos_ in ["PROPN"]])
 
 def main_loop():
-    question = input("Question: ")
+    while True:
+        question = input("Question: ")
 
-    search = get_subject(question)
-    print(search)
-    context = get_wiki_text(search)
+        search = get_subject(question)
+        print(search)
+        context = get_wiki_text(search)
 
-    model = pipeline("question-answering",model=model_name,tokenizer=tokenizer)
+        model = pipeline("question-answering",model=model_name,tokenizer=tokenizer)
 
-    output = model({'context': context,'question': question})
-    print(output)
+        output = model({'context': context,'question': question})
+        print(output)
 
 main_loop()
+
+if __name__ == "__main__":
+    main_loop()
 
 
 
