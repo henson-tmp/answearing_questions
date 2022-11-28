@@ -1,4 +1,4 @@
 spacy==3.4.3
 torch==1.13.0
-transormers==4.24.0
+transformers==4.24.0
 wikipedia==1.4.0
