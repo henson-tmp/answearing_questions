@@ -1,3 +1,4 @@
 tokenizer: "henryk/bert-base-multilingual-cased-finetuned-polish-squad2"
 model_name: "henryk/bert-base-multilingual-cased-finetuned-polish-squad2"
+lang: pl
 lang_model: "pl_core_news_sm"
